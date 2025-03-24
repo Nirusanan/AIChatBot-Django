@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>SignUp</title>
     <script src="{% static 'lib/bootstrap-dist/js/bootstrap.bundle.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/bootstrap-dist/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
@@ -13,11 +13,17 @@
 <div class="form-container">
     <form method="post" class="form-group">
         {% csrf_token %}
-        <h2 class="text-center mb-4">LLM Chatbot Login</h2>
+        <h2 class="text-center mb-4">LLM Chatbot SignUp</h2>
         <div class="mb-3">
             <label for="username" class="form-label">Username:</label>
             <input type="text" name="username" id="username" class="form-control" aria-describedby="usernameHelp"
                    placeholder="Enter your username">
+
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="text" name="email" id="email" class="form-control" aria-describedby="emailHelp"
+                   placeholder="Enter your email">
 
         </div>
         <div class="mb-3">
@@ -26,11 +32,11 @@
                    placeholder="Enter your password">
 
         </div>
-        <button type="submit" class="btn btn-custom btn-block">Login</button>
+        <button type="submit" class="btn btn-custom btn-block">Signup</button>
         <div class="mb-3"></div>
         <div class="mb-3">
-            <b>Don't have an account? </b>
-            <a class="btn btn-custom btn-sm ms-2" href="{% url 'signup' %}">Signup</a>
+            <b>Already have an account? </b>
+            <a class="btn btn-custom btn-sm ms-2" href="{% url 'login' %}">Login</a>
         </div>
     </form>
     {% if error %}
