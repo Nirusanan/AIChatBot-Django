@@ -1,0 +1,33 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.form-container {
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-custom {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    border-radius: 5px;
+}
+
+.btn-custom:hover {
+    background-color: #0056b3;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+        
