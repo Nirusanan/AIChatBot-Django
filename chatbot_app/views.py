@@ -2,9 +2,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template import loader
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.forms import AuthenticationForm
+from .models import CustomUser
 
 
 
@@ -32,14 +32,23 @@ def login_view(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        name=request.POST.get('username')
-        emailid=request.POST.get('email')
-        pwd=request.POST.get('password')
-        my_user=User.objects.create_user(name, emailid, pwd)
+        name = request.POST.get('username')
+        emailid = request.POST.get('email')
+        pwd = request.POST.get('password')
+
+        if CustomUser.objects.filter(username=name).exists():
+            return render(request, 'signup.html', {'error': 'Username already taken'})
+
+        if CustomUser.objects.filter(email=emailid).exists():
+            return render(request, 'signup.html', {'error': 'Email already registered'})
+
+        my_user = CustomUser.objects.create_user(username=name, email=emailid, password=pwd)
         my_user.save()
+        
         return redirect('login')
-    
+
     return render(request, 'signup.html')
+
 
 def signout(request):
     logout(request)
