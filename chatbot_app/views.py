@@ -6,7 +6,16 @@ from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from .models import CustomUser, ChatMessage, ChatSession
 from django.utils import timezone
+from dotenv import load_dotenv
+import os
+from groq import Groq
 
+# Load the environment variables from .env file
+load_dotenv()
+
+client = Groq(
+    api_key=os.environ.get("GROQ_API_KEY"),
+)
 
 
 @login_required
