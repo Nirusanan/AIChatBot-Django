@@ -4,21 +4,19 @@ Follow these detailed steps to set up your Django chatbot application.
 
 ## Step 1: create and activate virtual environmnet
 
-## Step 2: Install Django
-
-## Step 3: Install Requirements
+## Step 2: Install Requirements
 `
 pip install -r requirements.txt
 `
 
-## Step 4: Create .env File
+## Step 3: Create .env File
 
 `
 GROQ_API_KEY=your_secret_key_here
 `
 
 
-## Step 5: Create Tables
+## Step 4: Create Tables
 
 Before running the application, you need to create the necessary database tables. Run the following Django commands:
 
@@ -30,14 +28,14 @@ python manage.py makemigrations chatbot_app
 python manage.py migrate
 `
 
-## Step 6: Create a Superuser
+## Step 5: Create a Superuser
 
 `
 python manage.py createsuperuser
 `
 
 
-## Step 7: Run the App
+## Step 6: Run the App
 
 Finally, start your Django application by running:
 
