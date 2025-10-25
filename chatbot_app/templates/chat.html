@@ -4,19 +4,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat UI</title>
+    <title>Chatbot</title>
+
+    <link rel="stylesheet" href="{% static 'css/chat_style.css' %}">
+    <script defer src="{% static 'js/chat.js' %}"></script>
 
     <script src="{% static 'lib/bootstrap-dist/js/bootstrap.bundle.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/bootstrap-dist/css/bootstrap.min.css' %}">
 
-    <link rel="stylesheet" href="{% static 'css/chat_style.css' %}">
-
     <script src="{% static 'lib/js/highlight.min.js' %}"></script>
     <link rel="stylesheet" href="{% static 'lib/css/highligh_default.min.css' %}">
 
+    <!-- Load STIX Two Text font for mathematical content -->
+    <link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
+          rel="stylesheet">
+
+    <!-- Load Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script src="{% static 'lib/js/polyfill.min.js' %}"></script>
-    <script type="text/javascript" async src="{% static 'lib/js/tex-mml-chtml.js' %}"></script>
-    <script type="text/javascript" async src="{% static 'lib/js/tex-mml-chtml1.js' %}"></script>
+
+    <!-- Load MathJax for LaTeX rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: ['base', 'ams', 'noerrors', 'noundefined']
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+                renderActions: {
+                    addMenu: [],
+                    checkLoading: []
+                }
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax initial typesetting complete');
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <!-- Load Jquery -->
     <script src="{% static 'lib/js/jquery-3.7.1.min.js' %}"></script>
 </head>
 <body>
@@ -37,8 +71,15 @@
         <div id="chatMessages" class="d-flex flex-column"></div>
         <div id="inputArea">
             {% csrf_token %}
-            <textarea id="userInput" class="form-control" rows="3"></textarea>
-            <button id="sendButton" onclick="sendMessage()">Send</button>
+            <textarea id="userInput" placeholder="Ask anything" class="form-control" style="height: 50px;"></textarea>
+            <button id="sendButton">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                     class="lucide lucide-send">
+                    <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/>
+                    <path d="M21.854 2.147l-10.94 10.939"/>
+                </svg>
+            </button>
         </div>
     </div>
 </div>
@@ -47,6 +88,5 @@
     var logoutUrl = "{% url 'logout' %}";
     var loginUrl = "{% url 'login' %}";
 </script>
-<script defer src="{% static 'js/chat.js' %}"></script>
 </body>
 </html>
