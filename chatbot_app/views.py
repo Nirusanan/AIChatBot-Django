@@ -17,6 +17,8 @@ client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
 
+model = "llama-3.1-8b-instant"
+
 
 @login_required
 def chat_page(request):
@@ -69,6 +71,7 @@ new_chat_state = True
 chat_session = None
 
 
+@login_required
 def get_chat_sessions(request):
     sessions = ChatSession.objects.all().order_by('-updated_at')  # '-' indicates descending order
 
@@ -81,6 +84,7 @@ def get_chat_sessions(request):
     return JsonResponse(data, safe=False)  # safe=False is necessary to serialize a list
 
 
+@login_required
 def get_chat_messages(request, chat_uuid):
     global conversations, new_chat_state, chat_session
     # Retrieve the ChatSession by its UUID
@@ -90,19 +94,22 @@ def get_chat_messages(request, chat_uuid):
     messages = ChatMessage.objects.filter(chat=chat_session).order_by('time_stamp')
 
     # Create a list to store the formatted messages
-    conversations = []
+    conversations = [{"role": "system", "content": "You are a helpful assistant"}]
 
     # Format each message pair into the specified JSON structure
     for message in messages:
         conversations.append({"role": "user", "content": message.user_input})
         conversations.append({"role": "assistant", "content": message.response})
 
+    for conversation in conversations:
+        print(conversation)
     new_chat_state = False
 
     # Return the conversation list as a JSON response
     return JsonResponse({"conversation": conversations})
 
 
+@login_required
 def chat_response(request):
     global conversations, new_chat_state, chat_session
     if request.method == 'POST':
@@ -110,7 +117,7 @@ def chat_response(request):
         user_input = request.POST.get('message', '')
 
         if user_input == 'New chat':
-            conversations = []
+            conversations = [{"role": "system", "content": "You are a helpful assistant"}]
             new_chat_state = True
 
             return JsonResponse({'response': ""})
@@ -120,7 +127,7 @@ def chat_response(request):
                 conversations.append({"role": "user", "content": user_input})
 
                 response = client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model=model,
                     messages=conversations,
                 )
 
@@ -128,10 +135,17 @@ def chat_response(request):
 
                 conversations.append({"role": "assistant", "content": assistant_response})
 
+                title_prompt = """
+                    Generate a concise, descriptive title in English for the following input: {user_input}.
+                    The title should be clear, relevant, and free of quotation marks.
+                    Return only the title, with no additional explanation.
+                """
+
                 title_response = client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model=model,
                     messages=[{"role": "user",
-                               "content": f"""Generate a concise title for this {user_input} - Ensure that the title is in English and does not include quotation marks. And you do not tell any describe of your title, just give the title"""}]
+                               "content": title_prompt.format(user_input=user_input)
+                               }]
                 )
 
                 # Create a new ChatSession
@@ -151,7 +165,7 @@ def chat_response(request):
                 conversations.append({"role": "user", "content": user_input})
 
                 response = client.chat.completions.create(
-                    model="llama3-8b-8192",
+                    model=model,
                     messages=conversations,
                 )
 
