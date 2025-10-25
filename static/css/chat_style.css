@@ -32,13 +32,19 @@ body, html {
     display: flex;
     flex-direction: column;
     height: 100%;
+    align-items: center;
 }
 
 #chatMessages {
     overflow-y: auto;
-    padding: 10px;
+    padding: 5% 15% 2% 15%;
+    /* padding: 10px; */
     flex-grow: 1;
     background-color: #fff;
+    width: 100%; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .chat-message {
@@ -46,45 +52,63 @@ body, html {
     margin-bottom: 8px;
     border-radius: 18px;
     background-color: #ebebeb;
-    display: block;
-    max-width: 75%;
+    /* display: block; */
+    /* max-width: 75%; */
     word-wrap: break-word;
+    text-align: left;
 }
 
 .user-message {
-    background-color: #dcf8c6;
-    align-self: flex-end;
+    background-color: #ccc;
+    border: 1px solid #ccc;
+    white-space: pre-wrap; /* Preserve new lines for user input */
+    margin-left: 60%;
 }
 
 .bot-message {
-    background-color: #f0f0f0;
-    align-self: flex-start;
+    background-color: #ffffff;
+    white-space: normal; /* Avoid extra spacing with <br> */
 }
 
 #inputArea {
-    border-top: 1px solid #ccc;
-    padding: 10px;
+    width: 70%;
     display: flex;
+    justify-content: center;
+    align-items: center; /* Align items vertically */
+    padding: 10px;
+    position: relative;
 }
 
 #userInput {
     flex-grow: 1;
-    margin-right: 10px;
     border: 1px solid #ccc;
-    padding: 10px;
+    padding: 10px 40px 10px 10px; /* Leave space for the button */
     border-radius: 4px;
-    resize: none; /* Disable resizing of textarea */
+    resize: vertical; /* Allow vertical resizing only */
+    overflow: auto; /* Ensure scrollbar if needed */
 }
 
 #sendButton {
-    width: 100px;
-    background-color: #007bff;
-    color: white;
+    width: 30px; 
+    height: 30px;
+    background-color: transparent;
     border: none;
-    padding: 10px;
-    border-radius: 4px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
+
+#sendButton svg {
+    width: 20px; 
+    height: 20px;
+}
+
 
 .code-snippet {
     position: relative;
@@ -96,19 +120,20 @@ body, html {
     box-sizing: border-box; /* Ensures padding is included in the width/height */
 }
 
+pre {
+    display: block;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    overflow: auto;
+    font-size: .875em;
+    position: relative; /* Ensure pre tag can serve as a reference point for absolute positioning */
+}
+
 .copy-btn {
-    position: absolute;
-    top: 0.1rem;
-    right: 1rem; /* Maintain this to keep the button inside the border */
-    background-color: #d9a8a8;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    padding: 0.5rem;
-    cursor: pointer;
-    font-size: 0.875rem; /* Smaller font size if needed */
-    z-index: 10;
-    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2); 
+    background-color: #b2cda2;
+    position: absolute; /* Positioning the button absolutely inside the pre */
+    top: 0.1rem; /* Maintain the slight offset from the top */
+    right: 0.1rem; /* Position the button towards the right side */
 }
 
 .code-snippet pre {
@@ -118,11 +143,6 @@ body, html {
 }
 
 pre code {
-    background-color: #b43535; 
-    border: 1px solid #d9a8a8; 
-    display: block;
-    padding: 10px;
-    overflow-x: auto; /* Enable horizontal scrolling for longer lines */
     white-space: pre-wrap; /* Allows code to wrap */
     word-break: break-word; /* Break the word at the edge of the boundary */
     border-radius: 5px; 
@@ -144,38 +164,46 @@ pre code {
     background-color: #0056b3; 
 }
 
-.labelLink:hover {
-    text-decoration: underline;
-}
 
 #labelsList {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    width: 250px; /* Set a width for the list */
 }
 
 #labelsList li {
-    list-style-type: none; /* Remove bullet points */
-    padding: 10px; 
-    border-bottom: 1px solid #ddd; 
+    list-style-type: none;
+    padding: 10px;
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+    position: relative;
+    transition: height 0.3s ease; /* Add transition for smooth height change */
+}
+
+#labelsList li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    transition: white-space 0.3s ease; /* Smooth transition for whitespace change */
 }
 
 #labelsList li:hover {
-    background-color: #f5f5f5; /* Change background color on hover */
+    height: auto; /* Allow the height to adjust automatically */
+    background-color: #c1e1b1;
 }
 
-.labelLink {
-    text-decoration: none; 
-    color: #333; 
-    font-weight: bold; 
-    display: block; 
-    padding: 5px; 
-    border-radius: 5px; 
+#labelsList li:hover a {
+    white-space: normal; /* Allow text to wrap, show full text */
+    overflow: visible; /* Ensure complete text visibility */
+    line-height: normal; /* Reset line height if needed */
 }
 
-.labelLink:hover {
-    background-color: #ddd; 
-}
 
 #navButtonsContainer {
     display: flex;
@@ -200,6 +228,41 @@ pre code {
     background-color: #ddd;
 }
 
-#labelsList li a {
-    font-size: 14px; /* Change the font size to your desired value */
+code {
+  font-size: .875em;
+  color: seashell;
+  word-wrap: break-word;
 }
+
+table {
+    border-collapse: collapse; /* Changes to collapse to enhance line visibility */
+    width: 100%;
+    margin: 15px 0;
+    border: 1px solid #ccc;
+    font-family: 'Arial', sans-serif;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd; /* Add full border to clearly define columns */
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+td {
+    color: #333;
+    vertical-align: middle;
+}
+
+
+
