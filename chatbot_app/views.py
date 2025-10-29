@@ -73,7 +73,7 @@ chat_session = None
 
 @login_required
 def get_chat_sessions(request):
-    sessions = ChatSession.objects.all().order_by('-updated_at')  # '-' indicates descending order
+    sessions = ChatSession.objects.filter(user=request.user).order_by('-updated_at') # '-' indicates descending order
 
     # Construct a list of dictionaries for each session
     data = [
@@ -150,12 +150,19 @@ def chat_response(request):
 
                 # Create a new ChatSession
                 chat_title = title_response.choices[0].message.content
-                chat_session = ChatSession(chat_title=chat_title, updated_at=timezone.now())
-                chat_session.save()
+                chat_session = ChatSession.objects.create(
+                    user=request.user,
+                    chat_title=chat_title,
+                    updated_at=timezone.now()
+                )
 
                 # Create a new ChatMessage linked to the ChatSession
-                chat_message = ChatMessage(chat=chat_session, user_input=user_input, response=assistant_response)
-                chat_message.save()
+                ChatMessage.objects.create(
+                    chat=chat_session,
+                    user=request.user,
+                    user_input=user_input,
+                    response=assistant_response
+                )
 
                 new_chat_state = False
                 return JsonResponse({'response': assistant_response})
@@ -174,7 +181,15 @@ def chat_response(request):
                 conversations.append({"role": "assistant", "content": assistant_response})
 
                 # Create a new ChatMessage linked to the ChatSession
-                chat_message = ChatMessage(chat=chat_session, user_input=user_input, response=assistant_response)
-                chat_message.save()
+                ChatMessage.objects.create(
+                    chat=chat_session,
+                    user=request.user,
+                    user_input=user_input,
+                    response=assistant_response
+                )
+
+                 # Update session timestamp
+                chat_session.updated_at = timezone.now()
+                chat_session.save(update_fields=["updated_at"])
 
                 return JsonResponse({'response': assistant_response})
