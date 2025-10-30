@@ -174,12 +174,12 @@ pre code {
 
 #labelsList li {
     list-style-type: none;
-    padding: 10px;
+    padding: 10px 40px 10px 10px;
     height: 50px;
     line-height: 50px;
-    overflow: hidden;
     position: relative;
     transition: height 0.3s ease; /* Add transition for smooth height change */
+    overflow: visible; /* ✅ allow popup to appear outside */
 }
 
 #labelsList li a {
@@ -191,17 +191,83 @@ pre code {
     text-overflow: ellipsis;
     display: block;
     transition: white-space 0.3s ease; /* Smooth transition for whitespace change */
+    width: 200px;
 }
 
 #labelsList li:hover {
-    height: auto; /* Allow the height to adjust automatically */
+    height: 50px; /* Allow the height to adjust automatically */
     background-color: #c1e1b1;
 }
 
 #labelsList li:hover a {
-    white-space: normal; /* Allow text to wrap, show full text */
-    overflow: visible; /* Ensure complete text visibility */
-    line-height: normal; /* Reset line height if needed */
+   line-height: 50px; /* Reset line height if needed */
+   white-space: nowrap;
+
+}
+
+.menu-btn {
+    position: absolute;
+    right: 10px;
+    top: 12px;
+    font-size: 18px;
+    cursor: pointer;
+    color: #1a1a1a;
+    opacity: 0; 
+    transition: opacity 0.2s ease, color 0.3s ease;
+    pointer-events: none;    /* prevent click when invisible */
+}
+
+#labelsList li:hover .menu-btn {
+    opacity: 1;              
+    pointer-events: auto;    
+}
+
+.menu-btn:hover {
+    color: #000;
+}
+
+.popup-menu {
+    display: none;
+    position: absolute;
+    right: 5px;
+    top: 45px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 9999;
+    width: 120px;
+    padding: 5px 0;
+}
+
+.popup-menu.show {
+    display: block;
+}
+
+.popup-menu .menu-item {
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.popup-menu .menu-item:hover {
+    background-color: #f0f0f0;
+}
+
+.popup-menu .delete-item {
+    color: #d9534f;
+}
+
+.popup-menu .delete-item:hover {
+    background-color: #fdecea;
 }
 
 
