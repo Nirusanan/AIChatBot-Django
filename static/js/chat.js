@@ -106,14 +106,64 @@ document.addEventListener("DOMContentLoaded", () => {
                     a.textContent = chat.chat_title;
                     a.href = "#";
                     a.setAttribute('data-chat-id', chat.chat_uuid);
+                    a.dataset.fullTitle = chat.chat_title;
+
                     a.addEventListener('click', function (e) {
                         e.preventDefault();
                         console.log(chat.chat_uuid);
                         loadChatDetails(chat.chat_uuid);
                     });
+
+                    a.addEventListener('mouseenter', () => {
+                        if (a.scrollWidth > a.clientWidth) {
+                            a.title = a.dataset.fullTitle;
+                        } else {
+                            a.removeAttribute('title');
+                        }
+                    });
+
+                   
+                    // Three dots button
+                    const menuBtn = document.createElement('span');
+                    menuBtn.classList.add('menu-btn');
+                    menuBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>'; // ⋮ vertical dots
+
+                    // Hidden popup menu
+                    const menu = document.createElement('div');
+                    menu.classList.add('popup-menu');
+                    menu.innerHTML = `
+                        <button class="menu-item rename-item">
+                            <i class="fas fa-edit"></i> Rename
+                        </button>
+                        <button class="menu-item delete-item">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    `;
+
+                    // Toggle popup on click
+                    menuBtn.addEventListener('click', e => {
+                        e.stopPropagation();
+
+                        document.querySelectorAll('.popup-menu.show').forEach(openMenu => {
+                            if (openMenu !== menu) openMenu.classList.remove('show');
+                        });
+
+                        // Toggle current one
+                        menu.classList.toggle('show');
+                    });
+
+                    // Close popup when clicking outside
+                    document.addEventListener('click', () => {
+                        menu.classList.remove('show');
+                    });
+
+
                     li.appendChild(a);
+                    li.appendChild(menuBtn);
+                    li.appendChild(menu);
                     labelsList.appendChild(li);
                 });
+
             })
             .catch(error => {
                 console.error('Error fetching chat titles:', error);
