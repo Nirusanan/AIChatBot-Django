@@ -101,8 +101,6 @@ def get_chat_messages(request, chat_uuid):
         conversations.append({"role": "user", "content": message.user_input})
         conversations.append({"role": "assistant", "content": message.response})
 
-    for conversation in conversations:
-        print(conversation)
     new_chat_state = False
 
     # Return the conversation list as a JSON response
@@ -136,9 +134,14 @@ def chat_response(request):
                 conversations.append({"role": "assistant", "content": assistant_response})
 
                 title_prompt = """
-                    Generate a concise, descriptive title in English for the following input: {user_input}.
-                    The title should be clear, relevant, and free of quotation marks.
-                    Return only the title, with no additional explanation.
+                    Generate a short, concise English title (maximum 5 words) for the following user input:
+                    "{user_input}"
+
+                    Rules:
+                    - Keep it simple and descriptive.
+                    - Avoid punctuation and quotation marks.
+                    - No explanations or extra text.
+                    Return only the title.
                 """
 
                 title_response = client.chat.completions.create(
