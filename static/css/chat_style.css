@@ -82,10 +82,14 @@ body, html {
 #userInput {
     flex-grow: 1;
     border: 1px solid #ccc;
-    padding: 10px 40px 10px 10px; /* Leave space for the button */
-    border-radius: 4px;
-    resize: vertical; /* Allow vertical resizing only */
+    padding: 10px 40px 10px 20px; /* Leave space for the button */
+    border-radius: 50px;
+    resize: none; 
     overflow: auto; /* Ensure scrollbar if needed */
+    max-height: 300px; /* limit height */
+    min-height: 50px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
 #sendButton {
@@ -94,8 +98,8 @@ body, html {
     background-color: transparent;
     border: none;
     position: absolute;
-    right: 10px;
-    top: 50%;
+    right: 30px;
+    bottom: 10%;
     transform: translateY(-50%);
     cursor: pointer;
     display: flex;

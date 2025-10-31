@@ -18,8 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
     startNewChat();
 
     input.addEventListener('input', () => {
-        input.style.height = 'auto';
-        input.style.height = `${input.scrollHeight}px`;
+        input.style.height = 'auto'; 
+        const newHeight = Math.min(input.scrollHeight, 300); // Limit to 300px max
+        input.style.height = `${newHeight}px`; // Set new height
+        input.style.overflowY = input.scrollHeight > 300 ? 'auto' : 'hidden'; // Enable scroll only if exceeds 300px
     });
 
 
