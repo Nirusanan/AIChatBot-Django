@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     a.textContent = chat.chat_title;
                     a.href = "#";
                     a.setAttribute('data-chat-id', chat.chat_uuid);
+                    li.setAttribute('data-chat-uuid', chat.chat_uuid);
                     a.dataset.fullTitle = chat.chat_title;
 
                     a.addEventListener('click', function (e) {
@@ -148,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (openMenu !== menu) openMenu.classList.remove('show');
                         });
 
-                        // Toggle current one
                         menu.classList.toggle('show');
                     });
 
@@ -169,6 +169,47 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error('Error fetching chat titles:', error);
             });
     }
+
+
+    document.addEventListener('click', async e => {
+        if (e.target.closest('.delete-item')) {
+            e.stopPropagation();
+
+            const chatItem = e.target.closest('li');
+            const chatUUID = chatItem.dataset.chatUuid;
+
+            if (!chatUUID) return;
+
+            if (!confirm('Are you sure you want to delete this chat?')) return;
+
+            try {
+                const response = await fetch(`/api/delete_chat/${chatUUID}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (response.ok) {
+                    chatItem.remove();
+                    
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages) chatMessages.innerHTML = '';      
+                    console.log(`Chat ${chatUUID} deleted successfully`);
+
+                } else {
+                    const data = await response.json();
+                    alert('Failed to delete: ' + (data.message || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred while deleting.');
+            }
+        }
+                        
+    });
+    
 
     function startNewChat() {
         document.getElementById('chatMessages').innerHTML = '';

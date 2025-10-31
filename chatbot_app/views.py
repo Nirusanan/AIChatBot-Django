@@ -196,3 +196,17 @@ def chat_response(request):
                 chat_session.save(update_fields=["updated_at"])
 
                 return JsonResponse({'response': assistant_response})
+
+@login_required
+def delete_chat(request, chat_uuid):
+    global chat_session
+    # Retrieve the ChatSession by its UUID
+    chat_session = get_object_or_404(ChatSession, chat_uuid=chat_uuid)
+    if request.method == 'DELETE':
+        try:
+            ChatMessage.objects.filter(chat=chat_session).delete()
+            ChatSession.objects.filter(chat_uuid=chat_uuid).delete()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
