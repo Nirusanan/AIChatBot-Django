@@ -92,6 +92,64 @@ body, html {
     scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
 }
 
+.confirm-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.confirm-card.hidden {
+  display: none;
+}
+
+.confirm-card-content {
+  background: #fff;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  text-align: center;
+  width: 300px;
+}
+
+.confirm-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.confirm-btn {
+  background-color: #dc3545;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.confirm-btn:hover {
+  background-color: #c82333;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+}
+
 #sendButton {
     width: 30px; 
     height: 30px;

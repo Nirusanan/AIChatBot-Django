@@ -172,6 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
     }
 
+    let chatToDelete = null;
 
     document.addEventListener('click', async e => {
         if (e.target.closest('.delete-item')) {
@@ -179,40 +180,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const chatItem = e.target.closest('li');
             const chatUUID = chatItem.dataset.chatUuid;
-
             if (!chatUUID) return;
 
-            if (!confirm('Are you sure you want to delete this chat?')) return;
-
-            try {
-                const response = await fetch(`/api/delete_chat/${chatUUID}/`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.ok) {
-                    chatItem.remove();
-                    
-                    const chatMessages = document.getElementById('chatMessages');
-                    if (chatMessages) chatMessages.innerHTML = '';      
-                    console.log(`Chat ${chatUUID} deleted successfully`);
-
-                } else {
-                    const data = await response.json();
-                    alert('Failed to delete: ' + (data.message || 'Unknown error'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('An error occurred while deleting.');
-            }
+            chatToDelete = { chatItem, chatUUID };
+            document.getElementById('deleteConfirmCard').classList.remove('hidden');
         }
-                        
     });
-    
 
+    // Handle Confirm Delete
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (!chatToDelete) return;
+
+        const { chatItem, chatUUID } = chatToDelete;
+
+        try {
+            const response = await fetch(`/api/delete_chat/${chatUUID}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                chatItem.remove();
+                const chatMessages = document.getElementById('chatMessages');
+                if (chatMessages) chatMessages.innerHTML = '';
+                console.log(`Chat ${chatUUID} deleted successfully`);
+            } else {
+                const data = await response.json();
+                alert('Failed to delete: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred while deleting.');
+        } finally {
+            document.getElementById('deleteConfirmCard').classList.add('hidden');
+            chatToDelete = null;
+        }
+    });
+
+    // Handle Cancel Delete chat
+    document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
+        document.getElementById('deleteConfirmCard').classList.add('hidden');
+        chatToDelete = null;
+    });
+
+    
     function startNewChat() {
         document.getElementById('chatMessages').innerHTML = '';
 
