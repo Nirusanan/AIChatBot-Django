@@ -9,6 +9,8 @@ from django.utils import timezone
 from dotenv import load_dotenv
 import os
 from groq import Groq
+from .tools import weather_function, internet_search, get_weather, fetch_text_results
+import json
 
 # Load the environment variables from .env file
 load_dotenv()
@@ -17,7 +19,7 @@ client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
 
-model = "llama-3.1-8b-instant"
+model = "openai/gpt-oss-20b" #"llama-3.1-8b-instant"
 
 
 @login_required
@@ -127,9 +129,67 @@ def chat_response(request):
                 response = client.chat.completions.create(
                     model=model,
                     messages=conversations,
+                    tools=[weather_function, internet_search], 
+                    tool_choice="auto",
                 )
 
-                assistant_response = response.choices[0].message.content
+                message = response.choices[0].message
+
+                # Tool calling
+                if message.tool_calls:
+                    available_functions = {
+                        "get_weather": get_weather,
+                        "fetch_text_results": fetch_text_results,
+                    }
+
+                    for tool_call in message.tool_calls:
+                  
+                        function_name = tool_call.function.name
+                        function_to_call = available_functions.get(function_name)
+
+                        if not function_to_call:
+                            print("Unknown function:", function_name)
+                            continue
+
+                        # parse the function arguments safely
+                        try:
+                            function_args = json.loads(tool_call.function.arguments)
+                        except Exception as e:
+                            function_args = {}
+                            print("Failed to parse function arguments:", e)
+
+                        # call the function
+                        if function_name == "get_weather":
+                            function_response = function_to_call(city=function_args.get("location"))
+                        elif function_name == "fetch_text_results":
+                            function_response = function_to_call(query=function_args.get("query"))
+                        else:
+                            function_response = function_to_call(**function_args)
+
+                        # Ensure the function response stored as a plain string
+                        if isinstance(function_response, (dict, list)):
+                            function_content = json.dumps(function_response)  # for structured data
+                        else:
+                            function_content = str(function_response)
+
+                        conversations.append(
+                            {
+                                "role": "function",
+                                "name": function_name,
+                                "content": function_content,
+                            }
+                        )
+                    
+
+                    tool_response = client.chat.completions.create(
+                        model=model,
+                        messages=conversations,
+                    )
+             
+                    assistant_response = tool_response.choices[0].message.content
+                
+                else:
+                    assistant_response = message.content
 
                 conversations.append({"role": "assistant", "content": assistant_response})
 
@@ -177,9 +237,66 @@ def chat_response(request):
                 response = client.chat.completions.create(
                     model=model,
                     messages=conversations,
+                    tools=[weather_function, internet_search], 
+                    tool_choice="auto",
                 )
 
-                assistant_response = response.choices[0].message.content
+                message = response.choices[0].message
+
+                # Tool calling
+                if message.tool_calls:
+                    available_functions = {
+                        "get_weather": get_weather,
+                        "fetch_text_results": fetch_text_results,
+                    }
+
+                    for tool_call in message.tool_calls:
+                  
+                        function_name = tool_call.function.name
+                        function_to_call = available_functions.get(function_name)
+
+                        if not function_to_call:
+                            print("Unknown function:", function_name)
+                            continue
+
+                        # parse the function arguments safely
+                        try:
+                            function_args = json.loads(tool_call.function.arguments)
+                        except Exception as e:
+                            function_args = {}
+                            print("Failed to parse function arguments:", e)
+
+                        # call the function
+                        if function_name == "get_weather":
+                            function_response = function_to_call(city=function_args.get("location"))
+                        elif function_name == "fetch_text_results":
+                            function_response = function_to_call(query=function_args.get("query"))
+                        else:
+                            function_response = function_to_call(**function_args)
+
+                        # Ensure the function response stored as a plain string
+                        if isinstance(function_response, (dict, list)):
+                            function_content = json.dumps(function_response)  # for structured data
+                        else:
+                            function_content = str(function_response)
+
+                        conversations.append(
+                            {
+                                "role": "function",
+                                "name": function_name,
+                                "content": function_content,
+                            }
+                        )
+
+                    tool_response = client.chat.completions.create(
+                        model=model,
+                        messages=conversations,
+                    )
+             
+                    assistant_response = tool_response.choices[0].message.content
+                
+                else:
+                    assistant_response = message.content
 
                 conversations.append({"role": "assistant", "content": assistant_response})
 
