@@ -62,7 +62,9 @@ body, html {
     background-color: #ccc;
     border: 1px solid #ccc;
     white-space: pre-wrap; /* Preserve new lines for user input */
-    margin-left: 60%;
+    max-width: 50%;       
+    margin-left: auto;  
+    margin-right: 10px;
 }
 
 .bot-message {
@@ -390,6 +392,81 @@ tr:nth-child(even) {
 td {
     color: #333;
     vertical-align: middle;
+}
+
+.setting-card {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.setting-card.hidden {
+    display: none;
+}
+
+.setting-card-content {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 320px;
+    animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.setting-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.model-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f8f9fa;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.model-select:hover {
+    border-color: #007bff;
+}
+
+.confirm-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.save-btn {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    margin-top: 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
 }
 
 
