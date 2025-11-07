@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById("logoutButton");
     const sendBtn = document.getElementById("sendButton");
     const chatLinks = document.querySelectorAll('#labelsList a');
+    const settingsBtn = document.getElementById("settingsButton");
+    const settingCard = document.getElementById("settingCard");
 
     chatLinks.forEach(link => {
         link.addEventListener('click', function (e) {
@@ -224,6 +226,39 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => {
         document.getElementById('deleteConfirmCard').classList.add('hidden');
         chatToDelete = null;
+    });
+
+    // Model Setting
+    settingsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        settingCard.classList.remove("hidden");
+    });
+
+    settingCard.addEventListener("click", (e) => {
+        if (e.target === settingCard) {
+        settingCard.classList.add("hidden");
+        }
+    });
+
+    document.getElementById("saveModelBtn").addEventListener("click", async () => {
+        const model = document.getElementById("modelSelect").value;
+        if (!model) {
+            alert("Please select a model first.");
+            return;
+        }
+
+        const response = await fetch("/change-model/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: JSON.stringify({ model })
+        });
+
+        const data = await response.json();
+        alert(data.message);
+        settingCard.classList.add("hidden");
     });
 
     
