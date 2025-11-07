@@ -11,15 +11,14 @@ import os
 from groq import Groq
 from .tools import weather_function, internet_search, get_weather, fetch_text_results
 import json
+from openai import OpenAI
 
 # Load the environment variables from .env file
 load_dotenv()
 
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY"),
-)
-
-model = "openai/gpt-oss-20b" #"llama-3.1-8b-instant"
+current_model = "openai/gpt-oss-20b"
+groq_client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
+openAI_client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 
 @login_required
@@ -126,70 +125,88 @@ def chat_response(request):
             if new_chat_state:
                 conversations.append({"role": "user", "content": user_input})
 
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=conversations,
-                    tools=[weather_function, internet_search], 
-                    tool_choice="auto",
-                )
+                # Groq
+                if current_model=="openai/gpt-oss-20b":
 
-                message = response.choices[0].message
-
-                # Tool calling
-                if message.tool_calls:
-                    available_functions = {
-                        "get_weather": get_weather,
-                        "fetch_text_results": fetch_text_results,
-                    }
-
-                    for tool_call in message.tool_calls:
-                  
-                        function_name = tool_call.function.name
-                        function_to_call = available_functions.get(function_name)
-
-                        if not function_to_call:
-                            print("Unknown function:", function_name)
-                            continue
-
-                        # parse the function arguments safely
-                        try:
-                            function_args = json.loads(tool_call.function.arguments)
-                        except Exception as e:
-                            function_args = {}
-                            print("Failed to parse function arguments:", e)
-
-                        # call the function
-                        if function_name == "get_weather":
-                            function_response = function_to_call(city=function_args.get("location"))
-                        elif function_name == "fetch_text_results":
-                            function_response = function_to_call(query=function_args.get("query"))
-                        else:
-                            function_response = function_to_call(**function_args)
-
-                        # Ensure the function response stored as a plain string
-                        if isinstance(function_response, (dict, list)):
-                            function_content = json.dumps(function_response)  # for structured data
-                        else:
-                            function_content = str(function_response)
-
-                        conversations.append(
-                            {
-                                "role": "function",
-                                "name": function_name,
-                                "content": function_content,
-                            }
-                        )
-                    
-
-                    tool_response = client.chat.completions.create(
-                        model=model,
+                    response = groq_client.chat.completions.create(
+                        model=current_model,
                         messages=conversations,
+                        tools=[weather_function, internet_search], 
+                        tool_choice="auto",
                     )
-             
-                    assistant_response = tool_response.choices[0].message.content
+
+                    message = response.choices[0].message
+                    print(message)
+
+                    # Tool calling
+                    if message.tool_calls:
+                        available_functions = {
+                            "get_weather": get_weather,
+                            "fetch_text_results": fetch_text_results,
+                        }
+
+                        for tool_call in message.tool_calls:
+                    
+                            function_name = tool_call.function.name
+                            function_to_call = available_functions.get(function_name)
+
+                            if not function_to_call:
+                                print("Unknown function:", function_name)
+                                continue
+
+                            # parse the function arguments safely
+                            try:
+                                function_args = json.loads(tool_call.function.arguments)
+                            except Exception as e:
+                                function_args = {}
+                                print("Failed to parse function arguments:", e)
+
+                            # call the function
+                            if function_name == "get_weather":
+                                function_response = function_to_call(city=function_args.get("location"))
+                            elif function_name == "fetch_text_results":
+                                function_response = function_to_call(query=function_args.get("query"))
+                            else:
+                                function_response = function_to_call(**function_args)
+
+                            # Ensure the function response stored as a plain string
+                            if isinstance(function_response, (dict, list)):
+                                function_content = json.dumps(function_response)  # for structured data
+                            else:
+                                function_content = str(function_response)
+
+                            conversations.append(
+                                {
+                                    "role": "function",
+                                    "name": function_name,
+                                    "content": function_content,
+                                }
+                            )
+                        
+
+                        tool_response = groq_client.chat.completions.create(
+                            model=current_model,
+                            messages=conversations,
+                        )
                 
+                        assistant_response = tool_response.choices[0].message.content
+                        print(assistant_response)
+                
+                    else:
+                        assistant_response = message.content
+                        print(assistant_response)
+
+                # OpenAI
                 else:
-                    assistant_response = message.content
+                    response = openAI_client.responses.create(
+                        model=current_model,
+                        tools=[{"type": "web_search"}],
+                        input=conversations
+                    )
+
+                    print(response.output_text)
+                    assistant_response = response.output_text
+
 
                 conversations.append({"role": "assistant", "content": assistant_response})
 
@@ -204,15 +221,28 @@ def chat_response(request):
                     Return only the title.
                 """
 
-                title_response = client.chat.completions.create(
-                    model=model,
-                    messages=[{"role": "user",
-                               "content": title_prompt.format(user_input=user_input)
-                               }]
-                )
+                if current_model == "openai/gpt-oss-20b":
+                    title_response = groq_client.chat.completions.create(
+                        model=current_model,
+                        messages=[{"role": "user",
+                                "content": title_prompt.format(user_input=user_input)
+                        }]
+                    )
+                    chat_title = title_response.choices[0].message.content
+                    print(chat_title)
+                
+                else:
+                    title_response = openAI_client.responses.create(
+                        model=current_model,
+                        input=[{"role": "user",
+                                "content": title_prompt.format(user_input=user_input)
+                        }]
+                    )
+                    chat_title = title_response.output[0].content[0].text
+                    print(chat_title)
+
 
                 # Create a new ChatSession
-                chat_title = title_response.choices[0].message.content
                 chat_session = ChatSession.objects.create(
                     user=request.user,
                     chat_title=chat_title,
@@ -234,69 +264,82 @@ def chat_response(request):
                 print("Old chat session!")
                 conversations.append({"role": "user", "content": user_input})
 
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=conversations,
-                    tools=[weather_function, internet_search], 
-                    tool_choice="auto",
-                )
-
-                message = response.choices[0].message
-
-                # Tool calling
-                if message.tool_calls:
-                    available_functions = {
-                        "get_weather": get_weather,
-                        "fetch_text_results": fetch_text_results,
-                    }
-
-                    for tool_call in message.tool_calls:
-                  
-                        function_name = tool_call.function.name
-                        function_to_call = available_functions.get(function_name)
-
-                        if not function_to_call:
-                            print("Unknown function:", function_name)
-                            continue
-
-                        # parse the function arguments safely
-                        try:
-                            function_args = json.loads(tool_call.function.arguments)
-                        except Exception as e:
-                            function_args = {}
-                            print("Failed to parse function arguments:", e)
-
-                        # call the function
-                        if function_name == "get_weather":
-                            function_response = function_to_call(city=function_args.get("location"))
-                        elif function_name == "fetch_text_results":
-                            function_response = function_to_call(query=function_args.get("query"))
-                        else:
-                            function_response = function_to_call(**function_args)
-
-                        # Ensure the function response stored as a plain string
-                        if isinstance(function_response, (dict, list)):
-                            function_content = json.dumps(function_response)  # for structured data
-                        else:
-                            function_content = str(function_response)
-
-                        conversations.append(
-                            {
-                                "role": "function",
-                                "name": function_name,
-                                "content": function_content,
-                            }
-                        )
-
-                    tool_response = client.chat.completions.create(
-                        model=model,
+                # Groq
+                if current_model=="openai/gpt-oss-20b":
+                    response = groq_client.chat.completions.create(
+                        model=current_model,
                         messages=conversations,
+                        tools=[weather_function, internet_search], 
+                        tool_choice="auto",
                     )
-             
-                    assistant_response = tool_response.choices[0].message.content
+
+                    message = response.choices[0].message
+
+                    # Tool calling
+                    if message.tool_calls:
+                        available_functions = {
+                            "get_weather": get_weather,
+                            "fetch_text_results": fetch_text_results,
+                        }
+
+                        for tool_call in message.tool_calls:
+                    
+                            function_name = tool_call.function.name
+                            function_to_call = available_functions.get(function_name)
+
+                            if not function_to_call:
+                                print("Unknown function:", function_name)
+                                continue
+
+                            # parse the function arguments safely
+                            try:
+                                function_args = json.loads(tool_call.function.arguments)
+                            except Exception as e:
+                                function_args = {}
+                                print("Failed to parse function arguments:", e)
+
+                            # call the function
+                            if function_name == "get_weather":
+                                function_response = function_to_call(city=function_args.get("location"))
+                            elif function_name == "fetch_text_results":
+                                function_response = function_to_call(query=function_args.get("query"))
+                            else:
+                                function_response = function_to_call(**function_args)
+
+                            # Ensure the function response stored as a plain string
+                            if isinstance(function_response, (dict, list)):
+                                function_content = json.dumps(function_response)  # for structured data
+                            else:
+                                function_content = str(function_response)
+
+                            conversations.append(
+                                {
+                                    "role": "function",
+                                    "name": function_name,
+                                    "content": function_content,
+                                }
+                            )
+
+                        tool_response = groq_client.chat.completions.create(
+                            model=current_model,
+                            messages=conversations,
+                        )
                 
+                        assistant_response = tool_response.choices[0].message.content
+                    
+                    else:
+                        assistant_response = message.content
+
+                # OpenAI
                 else:
-                    assistant_response = message.content
+                    response = openAI_client.responses.create(
+                        model=current_model,
+                        tools=[{"type": "web_search"}],
+                        input=conversations
+                    )
+
+                    print(response)
+                    assistant_response = response.output_text
 
                 conversations.append({"role": "assistant", "content": assistant_response})
 
@@ -327,3 +370,29 @@ def delete_chat(request, chat_uuid):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def change_model(request):
+    global current_model
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            selected_model = data.get("model")
+            
+            # validation
+            allowed_models = [
+                "openai/gpt-oss-20b",
+                "gpt-4o",
+                "gpt-4.1",
+                "gpt-4.1-mini",
+            ]
+
+            if selected_model not in allowed_models:
+                return JsonResponse({"message": "Invalid model selection"}, status=400)
+
+            current_model = selected_model
+            return JsonResponse({"message": f"✅ Model changed to {current_model}"})
+        except Exception as e:
+            return JsonResponse({"message": str(e)}, status=500)
+
+    return JsonResponse({"message": "Only POST requests are allowed"}, status=405)
