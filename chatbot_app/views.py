@@ -137,7 +137,6 @@ def chat_response(request):
                     )
 
                     message = response.choices[0].message
-                    print(message)
 
                     # Tool calling
                     if message.tool_calls:
@@ -192,11 +191,9 @@ def chat_response(request):
                         )
                 
                         assistant_response = tool_response.choices[0].message.content
-                        print(assistant_response)
                 
                     else:
                         assistant_response = message.content
-                        print(assistant_response)
 
                 # OpenAI
                 else:
@@ -206,7 +203,6 @@ def chat_response(request):
                         input=conversations
                     )
 
-                    print(response.output_text)
                     assistant_response = response.output_text
 
 
@@ -231,7 +227,6 @@ def chat_response(request):
                         }]
                     )
                     chat_title = title_response.choices[0].message.content
-                    print(chat_title)
                 
                 else:
                     title_response = openAI_client.responses.create(
@@ -241,7 +236,6 @@ def chat_response(request):
                         }]
                     )
                     chat_title = title_response.output[0].content[0].text
-                    print(chat_title)
 
 
                 # Create a new ChatSession
@@ -341,7 +335,6 @@ def chat_response(request):
                         input=conversations
                     )
 
-                    print(response)
                     assistant_response = response.output_text
 
                 conversations.append({"role": "assistant", "content": assistant_response})
@@ -399,3 +392,19 @@ def change_model(request):
             return JsonResponse({"message": str(e)}, status=500)
 
     return JsonResponse({"message": "Only POST requests are allowed"}, status=405)
+
+@login_required
+def rename_chat(request, chat_uuid):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        new_title = data.get("title")
+
+        try:
+            chat = ChatSession.objects.get(chat_uuid=chat_uuid)
+            chat.chat_title = new_title
+            chat.save()
+            return JsonResponse({"success": True, "new_title": new_title})
+        except chat.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Chat not found"}, status=404)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
