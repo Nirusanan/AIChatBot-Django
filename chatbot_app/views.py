@@ -12,6 +12,7 @@ from groq import Groq
 from .tools import weather_function, internet_search, get_weather, fetch_text_results
 import json
 from openai import OpenAI
+import copy
 
 # Load the environment variables from .env file
 load_dotenv()
@@ -110,7 +111,7 @@ def get_chat_messages(request, chat_uuid):
 
 @login_required
 def chat_response(request):
-    global conversations, new_chat_state, chat_session
+    global conversations, new_chat_state, chat_session, copy_conversations
     if request.method == 'POST':
 
         user_input = request.POST.get('message', '')
@@ -175,7 +176,8 @@ def chat_response(request):
                             else:
                                 function_content = str(function_response)
 
-                            conversations.append(
+                            copy_conversations = copy.deepcopy(conversations)
+                            copy_conversations.append(
                                 {
                                     "role": "function",
                                     "name": function_name,
@@ -186,7 +188,7 @@ def chat_response(request):
 
                         tool_response = groq_client.chat.completions.create(
                             model=current_model,
-                            messages=conversations,
+                            messages=copy_conversations,
                         )
                 
                         assistant_response = tool_response.choices[0].message.content
@@ -312,7 +314,8 @@ def chat_response(request):
                             else:
                                 function_content = str(function_response)
 
-                            conversations.append(
+                            copy_conversations = copy.deepcopy(conversations)
+                            copy_conversations.append(
                                 {
                                     "role": "function",
                                     "name": function_name,
@@ -322,7 +325,7 @@ def chat_response(request):
 
                         tool_response = groq_client.chat.completions.create(
                             model=current_model,
-                            messages=conversations,
+                            messages=copy_conversations,
                         )
                 
                         assistant_response = tool_response.choices[0].message.content
