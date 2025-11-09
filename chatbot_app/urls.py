@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import chat_page, login_view, signup_view, logout_view, get_chat_sessions, get_chat_messages, chat_response, delete_chat, change_model 
+from .views import chat_page, login_view, signup_view, logout_view, get_chat_sessions, get_chat_messages, chat_response, delete_chat, change_model, rename_chat 
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/chat/', chat_response, name='chat_api'),
     path('api/delete_chat/<uuid:chat_uuid>/', delete_chat, name='delete_chat'),
     path('change-model/', change_model, name='change_model'),
+    path('api/rename_chat/<uuid:chat_uuid>/', rename_chat, name='rename_chat'),
 ]
