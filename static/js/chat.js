@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatLinks = document.querySelectorAll('#labelsList a');
     const settingsBtn = document.getElementById("settingsButton");
     const settingCard = document.getElementById("settingCard");
+    const labelsList = document.getElementById("labelsList");
 
     chatLinks.forEach(link => {
         link.addEventListener('click', function (e) {
@@ -187,7 +188,79 @@ document.addEventListener("DOMContentLoaded", () => {
             chatToDelete = { chatItem, chatUUID };
             document.getElementById('deleteConfirmCard').classList.remove('hidden');
         }
+
+        if (e.target.closest('.rename-item')) {
+            e.stopPropagation();
+
+            const listItem = e.target.closest("li");
+            const chatUUID = listItem.dataset.chatUuid;
+            const titleLink = listItem?.querySelector("a");
+            const oldTitle = titleLink.textContent.trim();
+
+            // Create input for editing
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = oldTitle;
+            input.classList.add("rename-input");
+
+            // Replace <a> with <input>
+            listItem.replaceChild(input, titleLink);
+            input.focus();
+
+            let isRenaming = false; // prevent double execution
+
+            const saveTitle = () => {
+                if (isRenaming) return; 
+                isRenaming = true;
+
+                const newTitle = input.value.trim() || oldTitle;
+
+                // Restore <a> tag
+                const newLink = document.createElement("a");
+                newLink.textContent = newTitle;
+                newLink.href = "#";
+                newLink.dataset.chatId = chatUUID;
+                newLink.dataset.fullTitle = newTitle;
+                newLink.title = newTitle;
+
+                // Reattach the click event to show chat messages
+                newLink.addEventListener('click', e => {
+                    e.preventDefault();
+                    loadChatDetails(chatUUID);
+                });
+
+                listItem.replaceChild(newLink, input);
+
+                fetch(`api/rename_chat/${chatUUID}/`, {
+                    method: "POST",
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title: newTitle }),
+                })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Failed to rename chat");
+                })
+                .catch((err) => {
+                    console.error(err);
+                    alert("Error updating chat title");
+                });
+            };
+
+            input.addEventListener("blur", saveTitle);
+            input.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    saveTitle();
+                    input.blur();
+                }
+            });
+           
+            
+        }
     });
+
 
     // Handle Confirm Delete
     document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {

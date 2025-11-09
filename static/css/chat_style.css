@@ -233,7 +233,8 @@ pre code {
     list-style-type: none;
     padding: 0;
     margin: 0;
-    width: 250px; /* Set a width for the list */
+    width: 100%; /* Set a width for the list */
+    max-width: 250px;
 }
 
 #labelsList li {
@@ -469,5 +470,21 @@ td {
     background-color: #0056b3;
 }
 
+.rename-input {
+  width: 90%;
+  padding: 4px 6px;
+  font-size: 14px;
+  border: none;
+  border-radius: 0;
+  background: transparent; 
+  color: #0078d7; 
+  outline: none;
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.rename-input:focus {
+  color: #005fa3; 
+}
 
 
