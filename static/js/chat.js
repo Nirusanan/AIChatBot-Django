@@ -10,13 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const settingCard = document.getElementById("settingCard");
     const labelsList = document.getElementById("labelsList");
 
-    chatLinks.forEach(link => {
-        link.addEventListener('click', function (e) {
-            e.preventDefault()
-            const chatId = this.getAttribute('data-chat-id');
-            loadChatDetails(chatId);
-        });
-    });
 
     startNewChat();
 
@@ -178,6 +171,24 @@ document.addEventListener("DOMContentLoaded", () => {
     let chatToDelete = null;
 
     document.addEventListener('click', async e => {
+
+        const chatLink = e.target.closest("a");
+        if (chatLink && labelsList.contains(chatLink)) {
+            e.preventDefault();
+
+            // Remove 'active' class from all items
+            labelsList.querySelectorAll("li").forEach(li => li.classList.remove("active"));
+
+            // Add 'active' class to clicked item
+            const listItem = chatLink.closest("li");
+            listItem.classList.add("active");
+
+            // Load chat details
+            const chatId = chatLink.dataset.chatId;
+            if (chatId) loadChatDetails(chatId);
+            return; 
+        }
+
         if (e.target.closest('.delete-item')) {
             e.stopPropagation();
 

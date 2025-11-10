@@ -267,7 +267,10 @@ pre code {
 #labelsList li:hover a {
    line-height: 50px; /* Reset line height if needed */
    white-space: nowrap;
+}
 
+#labelsList li.active {
+  background-color: #c1e1b1; 
 }
 
 .menu-btn {
