@@ -4,6 +4,11 @@ import uuid
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+sender_mail = os.environ.get("EMAIL_HOST_USER")
 
 
 class CustomUserManager(BaseUserManager):
@@ -86,7 +91,7 @@ def send_registration_email(sender, instance, created, **kwargs):
         send_mail(
             subject,
             message,
-            'admin@gmail.com',
+            sender_mail,
             [instance.email],
             fail_silently=False,
         )

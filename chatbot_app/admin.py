@@ -1,6 +1,11 @@
 from django.contrib import admin
 from .models import ChatMessage, ChatSession, CustomUser
 from django.core.mail import send_mail
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+sender_mail = os.environ.get("EMAIL_HOST_USER")
 
 # Register your models here.
 admin.site.register(ChatMessage)
@@ -40,7 +45,7 @@ class CustomUserAdmin(admin.ModelAdmin):
                 send_mail(
                     subject,
                     message,
-                    'admin@gmail.com',     # Sender
+                    sender_mail,     # Sender
                     [obj.email],           # Recipient
                     fail_silently=False,
                 )
