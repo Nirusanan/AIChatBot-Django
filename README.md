@@ -1,4 +1,8 @@
-# 🧠 AIChatbot-Django
+<div align="center">
+  
+  # 🧠 AIChatbot
+  ### An advanced AI chatbot built with Django, Groq & OpenAI
+</div>
 
 An advanced AI chatbot application built using **Django**, integrating **Groq** and **OpenAI** models with tool calling capabilities such as web search, weather updates, and news retrieval.  
 This project also includes user authentication, admin account management, and chat management functionalities.
@@ -60,7 +64,7 @@ EMAIL_HOST_PASSWORD=your_gmail_app_passowrd_16_character
 
 ✅ Create Gmail App Password
 
-🪪 Turn on 2-Step Verification
+🪪 Step 1 — Turn on 2-Step Verification
 
   * Go to 👉 https://myaccount.google.com/security
   * Under “Signing in to Google”, click “2-Step Verification”
@@ -69,7 +73,6 @@ EMAIL_HOST_PASSWORD=your_gmail_app_passowrd_16_character
 🔑 Step 2 — Generate App Password
 
 Once 2-Step Verification is enabled:
-
   * Go again to 👉 https://myaccount.google.com/security
   * Under “Signing in to Google”, click “App passwords”
   * Re-enter your Google account password
