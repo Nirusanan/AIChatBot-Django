@@ -254,7 +254,7 @@ def chat_response(request):
                 )
 
                 new_chat_state = False
-                return JsonResponse({'response': assistant_response})
+                return JsonResponse({'response': assistant_response, 'new_chat_session': chat_session.chat_uuid})
 
             else:
                 print("Old chat session!")
@@ -351,7 +351,7 @@ def chat_response(request):
                 chat_session.updated_at = timezone.now()
                 chat_session.save(update_fields=["updated_at"])
 
-                return JsonResponse({'response': assistant_response})
+                return JsonResponse({'response': assistant_response, 'old_chat_session': chat_session.chat_uuid})
 
 @login_required
 def delete_chat(request, chat_uuid):

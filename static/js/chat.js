@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const newBtn = document.getElementById("newChatButton");
     const logoutBtn = document.getElementById("logoutButton");
     const sendBtn = document.getElementById("sendButton");
-    const chatLinks = document.querySelectorAll('#labelsList a');
     const settingsBtn = document.getElementById("settingsButton");
     const settingCard = document.getElementById("settingCard");
     const labelsList = document.getElementById("labelsList");
@@ -88,49 +87,49 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => console.error('Failed to fetch chat details:', error));
     }
 
-    function display_previous_chat() {
-        fetch('/api/chat_id_title/')
-            .then(response => response.json())
-            .then(data => {
-                const labelsList = document.getElementById('labelsList');
-                labelsList.innerHTML = '';
+    async function display_previous_chat() {
+        try {
+            const response = await fetch('/api/chat_id_title/');
+            const data = await response.json();
+            const labelsList = document.getElementById('labelsList');
+            labelsList.innerHTML = '';
 
-                // Sort the data by chat_id in descending order
-                data.sort((a, b) => b.chat_id - a.chat_id);
+            // Sort the data by chat_id in descending order
+            data.sort((a, b) => b.chat_id - a.chat_id);
 
-                data.forEach(chat => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.textContent = chat.chat_title;
-                    a.href = "#";
-                    a.setAttribute('data-chat-id', chat.chat_uuid);
-                    li.setAttribute('data-chat-uuid', chat.chat_uuid);
-                    a.dataset.fullTitle = chat.chat_title;
+            data.forEach(chat => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.textContent = chat.chat_title;
+                a.href = "#";
+                a.setAttribute('data-chat-id', chat.chat_uuid);
+                li.setAttribute('data-chat-uuid', chat.chat_uuid);
+                a.dataset.fullTitle = chat.chat_title;
 
-                    a.addEventListener('click', function (e) {
-                        e.preventDefault();
-                        console.log(chat.chat_uuid);
-                        loadChatDetails(chat.chat_uuid);
-                    });
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    console.log(chat.chat_uuid);
+                    loadChatDetails(chat.chat_uuid);
+                });
 
-                    a.addEventListener('mouseenter', () => {
-                        if (a.scrollWidth > a.clientWidth) {
-                            a.title = a.dataset.fullTitle;
-                        } else {
-                            a.removeAttribute('title');
-                        }
-                    });
+                a.addEventListener('mouseenter', () => {
+                    if (a.scrollWidth > a.clientWidth) {
+                        a.title = a.dataset.fullTitle;
+                    } else {
+                        a.removeAttribute('title');
+                    }
+                });
 
                    
-                    // Three dots button
-                    const menuBtn = document.createElement('span');
-                    menuBtn.classList.add('menu-btn');
-                    menuBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>'; // ⋮ vertical dots
+                // Three dots button
+                const menuBtn = document.createElement('span');
+                menuBtn.classList.add('menu-btn');
+                menuBtn.innerHTML = '<i class="fas fa-ellipsis-v"></i>'; // ⋮ vertical dots
 
-                    // Hidden popup menu
-                    const menu = document.createElement('div');
-                    menu.classList.add('popup-menu');
-                    menu.innerHTML = `
+                // Hidden popup menu
+                const menu = document.createElement('div');
+                menu.classList.add('popup-menu');
+                menu.innerHTML = `
                         <button class="menu-item rename-item">
                             <i class="fas fa-edit"></i> Rename
                         </button>
@@ -139,33 +138,31 @@ document.addEventListener("DOMContentLoaded", () => {
                         </button>
                     `;
 
-                    // Toggle popup on click
-                    menuBtn.addEventListener('click', e => {
-                        e.stopPropagation();
+                // Toggle popup on click
+                menuBtn.addEventListener('click', e => {
+                    e.stopPropagation();
 
-                        document.querySelectorAll('.popup-menu.show').forEach(openMenu => {
-                            if (openMenu !== menu) openMenu.classList.remove('show');
-                        });
-
-                        menu.classList.toggle('show');
+                    document.querySelectorAll('.popup-menu.show').forEach(openMenu => {
+                        if (openMenu !== menu) openMenu.classList.remove('show');
                     });
 
-                    // Close popup when clicking outside
-                    document.addEventListener('click', () => {
-                        menu.classList.remove('show');
-                    });
-
-
-                    li.appendChild(a);
-                    li.appendChild(menuBtn);
-                    li.appendChild(menu);
-                    labelsList.appendChild(li);
+                    menu.classList.toggle('show');
                 });
 
-            })
-            .catch(error => {
-                console.error('Error fetching chat titles:', error);
+                // Close popup when clicking outside
+                document.addEventListener('click', () => {
+                    menu.classList.remove('show');
+                });
+
+
+                li.appendChild(a);
+                li.appendChild(menuBtn);
+                li.appendChild(menu);
+                labelsList.appendChild(li);
             });
+        } catch (error) {
+            console.error('Error fetching chat titles:', error);
+        }
     }
 
     let chatToDelete = null;
@@ -175,6 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const chatLink = e.target.closest("a");
         if (chatLink && labelsList.contains(chatLink)) {
             e.preventDefault();
+
+            new_chat_state = false;
 
             // Remove 'active' class from all items
             labelsList.querySelectorAll("li").forEach(li => li.classList.remove("active"));
@@ -388,9 +387,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 success: function (data) {
                     appendMessage(data.response, 'bot-message');
                     if (new_chat_state) {
-                        display_previous_chat();
+                        display_previous_chat().then(() => {
+                            const newChatItem = labelsList.querySelector(`li[data-chat-uuid="${data.new_chat_session}"]`);
+                            if (newChatItem) {
+                                newChatItem.classList.add('active');
+                            }
+                        }); 
+                        new_chat_state = false;  
                     }
-                    new_chat_state = false;
+                    else {
+                        display_previous_chat().then(() => {
+                            const ChatItem = labelsList.querySelector(`li[data-chat-uuid="${data.old_chat_session}"]`);
+
+                            if (ChatItem) {
+                                labelsList.querySelectorAll('li').forEach(li => li.classList.remove('active'));
+                                ChatItem.classList.add('active');
+                            }
+                        }); 
+                    }
+                                      
                 },
                 error: function (xhr) {
                     appendMessage("Error: " + xhr.statusText, 'bot-message');
